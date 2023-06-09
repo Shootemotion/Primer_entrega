@@ -1,9 +1,12 @@
 import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
+import ProductManager from './productManager.js'
+
+const productManager = new ProductManager('./src/dataBase/products.json') 
 
 class CartManager {
   constructor() {
-    this.path = './src/dataBase/cart.json';
+    this.path = './src/dataBase/cart.json'
   }
 
 
@@ -19,17 +22,17 @@ class CartManager {
   }
 
 
-
   async createCart() {
     const carts = await this.getCarts();
     const newCart = {
-      id: uuidv4(), // Agregar una coma después de esta línea
+      id: uuidv4(),
       products: []
     };
     carts.push(newCart);
     await this.saveCarts(carts);
     return newCart;
   }
+
 
 
   async saveCarts(carts) {
@@ -41,32 +44,47 @@ class CartManager {
   }
 
 
-
   async getProductsInCart(cartId) {
     const carts = await this.getCarts();
-    const cart = carts.find((c) => c.id === cartId);
-    return cart ? cart.products : [];
+    const cart = carts.find((c) => c.id === cartId)
+    if (!cart) {
+      throw { status: 404, message: 'Carrito no encontrado' }
+    }
+    return cart.products
   }
 
-  async addProductToCart(cartId, productId) {
+
+
+  async addProductToCart(cartId, productId, quantity) {
     const carts = await this.getCarts();
     const cart = carts.find((c) => c.id === cartId);
 
+
+    let product
+    try {
+      product = await productManager.getProductById(productId);
+    } catch (error) {
+      throw { status: 404, message: 'Producto no encontrado' };
+    }
+
     if (!cart) {
-      return null; // Carrito no encontrado
+      throw { status: 404, message: 'Carrito no encontrado' };
+    }
+  
+    if (product.stock < quantity) {
+      throw { status: 400, message: 'No hay suficiente stock disponible' };
     }
 
-    const existingProduct = cart.products.find((p) => p.product === productId);
-
+    // Verificar si el producto ya existe en el carrito
+    const existingProduct = cart.products.find((p) => p.product === productId)
     if (existingProduct) {
-      existingProduct.quantity++; // Incrementar la cantidad si el producto ya existe en el carrito
+      existingProduct.quantity += quantity
     } else {
-      cart.products.push({ product: productId, quantity: 1 }); // Agregar el nuevo producto al carrito
+      cart.products.push({ product: productId, quantity })
     }
-
-    await this.saveCarts(carts);
-    return cart;
+  
+    await this.saveCarts(carts)
+    return cart
   }
 }
-
-export default CartManager;
+export default CartManager
