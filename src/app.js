@@ -7,7 +7,8 @@ import cartRouter from './router/carts.router.js'
 
 const app = express()
 app.use(express.json())
-
+app.engine('handlebars', exphbs())
+app.set('view engine', 'handlebars')
 
 app.get('/', (req,res)=> res.send('OK'))
 app.get('/status',(req,res)=>res.send({message: 'Server UP'}))
