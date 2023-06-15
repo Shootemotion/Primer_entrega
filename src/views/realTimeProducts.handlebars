@@ -1,0 +1,36 @@
+<!-- realTimeProducts.handlebars -->
+<form id="productForm">
+  <input type="text" name="title" placeholder="Title" required>
+  <input type="text" name="description" placeholder="Description" required>
+  <input type="number" name="price" placeholder="Price" required>
+  <input type="number" name="stock" placeholder="Stock" required>
+  <button type="submit">Add Product</button>
+</form>
+
+<!-- lista de productos -->
+<table id="productList" class="product-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Price</th>
+      <th>Stock</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each products}}
+    <tr>
+      <td>{{this.id}}</td>
+      <td>{{this.title}}</td>
+      <td>{{this.description}}</td>
+      <td>{{this.price}}</td>
+      <td>{{this.stock}}</td>
+      <td>
+        <button onclick="deleteProduct('{{this.id}}')">Delete</button>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

@@ -79,23 +79,5 @@
 		"thumbnail": "https://example.com/auriculares_gaming.jpg",
 		"code": "HPM654",
 		"stock": 15
-	},
-	{
-		"id": 12,
-		"title": "Producto de ejemplo",
-		"description": "Descripción del producto",
-		"price": 11223,
-		"thumbnail": [],
-		"code": "3123",
-		"stock": 10
-	},
-	{
-		"id": 13,
-		"title": "Producto de ejemplo",
-		"description": "Descripción del producto",
-		"price": 9.99,
-		"thumbnail": "https://example.com/image.jpg",
-		"code": "ABC123",
-		"stock": 10
 	}
 ]
