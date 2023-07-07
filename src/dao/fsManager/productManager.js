@@ -7,7 +7,7 @@ class ProductManager {
 
   async addProduct(product) {
     // busco el array de productos, espero con el await el metodo getproduct
-    const products = await this.getProducts()
+    const products = await this.find()
     // Asignar id autoincrementable   -  Uso ternario para Luke
     const UltimoId = products.length > 0 ? products[products.length - 1].id : 0
     const NuevoID = UltimoId + 1
@@ -30,7 +30,7 @@ class ProductManager {
     return newProduct
   }
 
-  async getProducts() {
+  async find() {
     try {
       const data = await fs.promises.readFile(this.path, 'utf-8')
   
@@ -46,7 +46,7 @@ class ProductManager {
   
 
   async getProductById(id) {
-    const products = await this.getProducts()
+    const products = await this.find()
     // con find busco en el array el mismo id
     const product = products.find((p) => p.id == id)
     if (product) {
@@ -57,7 +57,7 @@ class ProductManager {
   }
 
   async updateProduct(id, campoUpdate) {
-    const products = await this.getProducts()
+    const products = await this.find()
     // Buscar el producto con el id especificado
     const productId = await this.getProductById(id)
     // Actualizar los campos del producto
@@ -76,7 +76,7 @@ class ProductManager {
   }
 
   async deleteProduct(id) {
-    const products = await this.getProducts()
+    const products = await this.find()
     const productId = parseInt(id, 10);
     // Filtro los productos y elimino el que tenga el id especificado (podia usar el getElementbyId con el Find pero esto es para probar)
     const newProducts = products.filter((p) => p.id !== productId)
