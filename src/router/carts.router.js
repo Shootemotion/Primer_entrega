@@ -1,52 +1,106 @@
 import {Router} from 'express';
 import CartManager from '../dao/fsManager/cartManager.js';
+import { cartModel } from '../dao/models/cart.model.js';
 
 const router = Router();
 const cartManager = new CartManager()
 
 
+// Obtener todos los cart 
+router.get('/', async (req, res) => {
+  try{
+    
+    let cart = await cartModel.find().lean().exec()
+   res.status(200).json({status: 'succes', payload: cart})
+      
+  }catch{
+    res.status(500).json({status: 'erro', error: err.message})
+
+    }
+  })
+
+
+
 
 // Crear un nuevo carrito
 router.post('/', async (req, res) => {
-  const newCart = await cartManager.createCart()
-  res.json(newCart)
-})
+  try {
+    const newCart = await cartModel.create({});
+    res.status(200).json({status:'success', payload: newCart});
+  } catch (err) {
+    res.status(500).json({ message: 'Ocurrió un error al crear el carrito.', error: err });
+  }
+});
 
 
 
-// Agrregar un producto al carrito
+// Agregar un producto al carrito
 router.post('/:cid/product/:pid', async (req, res) => {
   try {
     const cartId = req.params.cid;
     const productId = req.params.pid;
-    const quantity = req.body.quantity; // Obtener la cantidad desde el cuerpo de la solicitud
+    const quantity = req.body.quantity;
 
-    const addedProduct = await cartManager.addProductToCart(cartId, productId, quantity);
-
-    res.json(addedProduct)
-    
-  } catch (error) {
-    console.error('Error en cart.router:', error)
-// Ver como manejar los errores.
-    if (error.status === 404) {
-      res.status(404).json({ error: error.message })
-    } else if (error.status === 400) {
-      res.status(400).json({ error: error.message })
-    } else {
-      res.status(500).json({ error: 'Error interno del servidor' })
+    // Verificar que se proporcione una cantidad válida
+    if (!quantity || isNaN(quantity) || quantity <= 0) {
+      return res.status(400).json({ error: 'La cantidad debe ser un número válido y mayor que cero.' });
     }
-  }
-})
 
+    const cart = await cartModel.findOneAndUpdate(
+      {
+        _id: cartId,
+        products: {
+          $elemMatch: { product: productId }
+        }
+      },
+      {
+        $inc: { 'products.$.quantity': quantity }
+      },
+      { new: true }
+    );
+
+    if (!cart) {
+      // El producto no existe en el carrito, se agrega como un nuevo elemento
+      const addedProduct = await cartModel.findByIdAndUpdate(
+        cartId,
+        { $addToSet: { products: { product: productId, quantity: quantity } } },
+        { new: true }
+      );
+
+      if (!addedProduct) {
+        return res.status(404).json({ error: 'No se encontró el producto especificado.' });
+      }
+
+      return res.status(200).json({ status: 'success', payload: addedProduct });
+    }
+
+    res.status(200).json({ status: 'success', payload: cart });
+
+  } catch (error) {
+    console.error('Error en cart.router:', error);
+
+    // Manejo de errores genérico
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
 
 
 // Listar los productos del carrito
 router.get('/:cid', async (req, res) => {
   const cartId = req.params.cid;
-  const products = await cartManager.getProductsInCart(cartId)
-  res.json(products)
-})
 
+  try {
+    const cart = await cartModel.findById(cartId);
+    if (!cart) {
+      return res.status(404).json({ error: 'Carrito no encontrado' });
+    }
+
+    const products = cart.products;
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
 
 
 export default router

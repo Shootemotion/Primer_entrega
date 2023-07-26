@@ -14,7 +14,7 @@ productRouter.get('/', async (req, res) => {
    res.status(200).json({status: 'succes', payload: products})
       
   }catch{
-    res.status(500).json({status: 'erro', error: err.message})
+    res.status(500).jsonmongodb://localhost:27017({status: 'erro', error: err.message})
 
     }
   })
@@ -54,6 +54,35 @@ productRouter.get('/:pid', async (req, res) => {
       res.status(500).json({ message: 'Ocurrió un problema en la carga de datos.', error: err.message })
     }
   })
+
+
+  // Agregar nuevos productos
+productRouter.post('/manyProducts', async (req, res) => {
+  try {
+    const newProducts = req.body; // Ahora esperamos un array de productos
+    if (!Array.isArray(newProducts) || newProducts.length === 0) {
+      return res.status(400).json({ error: 'Se debe proporcionar una lista de productos válida.' });
+    }
+
+    // Iterar sobre la lista de productos y verificar cada uno
+    for (const newProduct of newProducts) {
+      if (!newProduct.title || !newProduct.description || !newProduct.price || !newProduct.stock) {
+        return res.status(400).json({ error: 'Todos los campos son requeridos para cada producto.' });
+      }
+
+      if (typeof newProduct.price !== 'number' || typeof newProduct.stock !== 'number') {
+        return res.status(400).json({ error: 'Los campos price y stock deben ser números para cada producto.' });
+      }
+    }
+
+    // Crear y agregar cada producto a la base de datos
+    const createdProducts = await productModel.create(newProducts);
+    const products = await productModel.find().lean().exec();
+    res.status(200).json({ message: 'Productos agregados', productos: createdProducts });
+  } catch (err) {
+    res.status(500).json({ message: 'Ocurrió un problema en la carga de datos.', error: err.message });
+  }
+});
 
 
 // Actualizar un producto existente

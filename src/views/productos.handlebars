@@ -1,0 +1,20 @@
+<div>
+    Bienvenido {{username}}
+</div>
+
+<div>
+ <tbody>
+    {{#each ListProduct}}
+    <tr>
+      <td>{{this.id}}</td>
+      <td>{{this.title}}</td>
+      <td>{{this.description}}</td>
+      <td>{{this.price}}</td>
+      <td>{{this.stock}}</td>
+      <td>
+        <button onclick="deleteProduct('{{this.id}}')">Delete</button>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</div>
