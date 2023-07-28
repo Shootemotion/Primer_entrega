@@ -1,9 +1,8 @@
 import {Router} from 'express';
-import CartManager from '../dao/fsManager/cartManager.js';
-import { cartModel } from '../dao/models/cart.model.js';
+
+import { cartModel } from '../dao/models/cart.model.js'
 
 const router = Router();
-const cartManager = new CartManager()
 
 
 // Obtener todos los cart 
@@ -84,13 +83,12 @@ router.post('/:cid/product/:pid', async (req, res) => {
   }
 });
 
-
-// Listar los productos del carrito
+// Obtener Carrito por ID
 router.get('/:cid', async (req, res) => {
   const cartId = req.params.cid;
 
   try {
-    const cart = await cartModel.findById(cartId);
+    const cart = await cartModel.findById(cartId).populate('products.product').exec();
     if (!cart) {
       return res.status(404).json({ error: 'Carrito no encontrado' });
     }
@@ -98,10 +96,10 @@ router.get('/:cid', async (req, res) => {
     const products = cart.products;
     res.json(products);
   } catch (err) {
+    console.error('Error al obtener el carrito por ID:', err); // Agrega este mensaje para obtener información sobre el error
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
-
 
 export default router
 

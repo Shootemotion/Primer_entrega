@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import mongoosePaginate from 'mongoose-paginate-v2'
 
 const productsCollection = 'products'
 
@@ -12,6 +13,9 @@ const productSchema = new mongoose.Schema({
     category:{type: String, required: true},
     thumbnail: {type: [String], default: []},
 })
+
+//plugin for pagination of data using skip and limit method in mongoDB
+productSchema.plugin(mongoosePaginate);
 
 mongoose.set('strictQuery',false)
 

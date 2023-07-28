@@ -1,13 +1,19 @@
 <!-- realTimeProducts.handlebars -->
-<form id="productForm">
+<h1>{{nombre_vista}}</h1>
+
+<!-- Formulario para agregar productos -->
+<form id="productForm" action="/products" method="post"> 
   <input type="text" name="title" placeholder="Title" required>
   <input type="text" name="description" placeholder="Description" required>
-  <input type="number" name="price" placeholder="Price" required>
-  <input type="number" name="stock" placeholder="Stock" required>
+  <input type="number" name="price" placeholder="Price" required step="any">
+  <input type="text" name="code" placeholder="Code" required>
+  <input type="text" name="category" placeholder="Category" required>
+  <input type="number" name="stock" placeholder="Stock" required step="any">
+  <input type="text" name="thumbnail" placeholder="Pictures" required>
   <button type="submit">Add Product</button>
 </form>
 
-<!-- lista de productos -->
+<!-- Lista de productos -->
 <table id="productList" class="product-table">
   <thead>
     <tr>
@@ -22,15 +28,35 @@
   <tbody>
     {{#each products}}
     <tr>
-      <td>{{this.id}}</td>
+      <td>{{this._id}}</td>
       <td>{{this.title}}</td>
       <td>{{this.description}}</td>
       <td>{{this.price}}</td>
       <td>{{this.stock}}</td>
       <td>
-        <button onclick="deleteProduct('{{this.id}}')">Delete</button>
+        <button onclick="deleteProduct('{{this.code}}')">Delete</button>
       </td>
     </tr>
     {{/each}}
   </tbody>
 </table>
+
+<!-- Paginación -->
+{{#if totalPages}}
+  <nav>
+    <ul class="pagination">
+      {{#if firstLink}}
+        <li><a href="{{firstLink}}">First</a></li>
+      {{/if}}
+      {{#if prevLink}}
+        <li><a href="{{prevLink}}">Previous</a></li>
+      {{/if}}
+      {{#if nextLink}}
+        <li><a href="{{nextLink}}">Next</a></li>
+      {{/if}}
+      {{#if lastLink}}
+        <li><a href="{{lastLink}}">Last</a></li>
+      {{/if}}
+    </ul>
+  </nav>
+{{/if}}

@@ -9,8 +9,9 @@ productForm.addEventListener('submit', (event) => {
   // Obtiene los valores ingresados en el formulario
   const title = document.querySelector('input[name="title"]').value;
   const description = document.querySelector('input[name="description"]').value;
-  const price = document.querySelector('input[name="price"]').value;
-  const stock = document.querySelector('input[name="stock"]').value;
+  const price = +document.querySelector('input[name="price"]').value;
+  const code = document.querySelector('input[name="code"]').value;
+  const stock = +document.querySelector('input[name="stock"]').value;
   console.log({ title, description, price, stock });
 
 

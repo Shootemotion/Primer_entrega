@@ -1,42 +1,57 @@
 import express from 'express';
+import { productModel } from './dao/models/product.model.js';
 import userRouter from './router/user.router.js';
 import productRouter from './router/products.router.js';
 import cartRouter from './router/carts.router.js';
 import handlebars from 'express-handlebars';
 import http from 'http';
 import { Server } from 'socket.io';
-import ProductManager from './dao/fsManager/productManager.js';
 import mongoose from 'mongoose';
-import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import session from 'express-session';
 
-const productModel = new ProductManager('./src/dataBase/products.json');
 
 const app = express();
-app.use(express.json());
-const server = http.createServer(app);
-const io = new Server(server);
 
+// Middleware para parsear los datos del formulario
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+// Configuración de la sesión
 app.use(
   session({
     store: MongoStore.create({
-      mongoUrl: 'mongodb://localhost:27017',
-      dbName: 'PrimerDBStorage',
+      mongoUrl: 'mongodb+srv://Shootemotion:Soporte01@cluster0.trosur8.mongodb.net/',
+      dbName: 'sessionsDB',
       mongoOptions: {
         useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
+        useUnifiedTopology: true
+      }
     }),
-    secret: 'victoriasecret',
+    secret: 'secretKey',
     resave: true,
-    saveUninitialized: true,
+    saveUninitialized: true
   })
 );
+
+
+const auth = (req, res, next) => {
+  if (req.session?.user) 
+  return next()
+ else {
+  // Redirigir al usuario a la ruta de inicio de sesión (login)
+  return res.redirect('/users/login');
+}
+}
+
 
 // Configuración del motor de plantillas
 app.engine('handlebars', handlebars.engine());
 app.set('views', './src/views');
 app.set('view engine', 'handlebars');
+
+
 
 // Configuración de rutas
 app.use(express.static('./public'));
@@ -44,38 +59,97 @@ app.use('/products', productRouter);
 app.use('/carts', cartRouter);
 app.use('/users', userRouter);
 
+
+//VISTAS HANDLEBARS
 // Ruta para la vista /home
 app.get('/home', async (req, res) => {
-  const products = await productModel.find();
+  const products = await productModel.find().lean().exec();
   res.render('home', {
     nombre_vista: 'Home',
-    products,
+    products
   });
 });
 
 // Ruta para la vista /realtimeproducts
-app.get('/realtimeproducts', async (req, res) => {
-  const products = await productModel.find();
-  res.render('realTimeProducts', {
-    nombre_vista: 'Real Time Products',
-    products,
-  });
-});
+app.get('/realtimeproducts', auth, async (req, res) => {
+  const productsPerPage = 10; // Número de productos por página (ajústalo según tus necesidades)
+  const page = parseInt(req.query.page) || 1;
 
-const auth = (req, res, next) => {
-  if (req.session?.user && req.session.user.username === 'admin@coderhouse.com') {
-    return next();
+  try {
+    const options = {
+      page,
+      limit: productsPerPage,
+      lean: true
+    };
+
+    const products = await productModel.paginate({}, options); // Utiliza la función paginate de mongoose-paginate-v2
+
+    products.prevLink = products.hasPrevPage 
+    ? `/realtimeproducts?page=${products.prevPage}`
+    : '';
+
+    products.nextLink = products.hasNextPage 
+    ? `/realtimeproducts?page=${products.nextPage}`
+    : '';
+
+    const totalPages = products.totalPages;
+    
+    res.render('realTimeProducts', {
+      nombre_vista: 'Real Time Products',
+      products: products.docs,
+      currentPage: page,
+      totalPages,
+      prevLink: products.prevLink,
+      nextLink: products.nextLink,
+      firstLink: `/realtimeproducts?page=1`,
+      lastLink: `/realtimeproducts?page=${totalPages}`
+    });
+
+
+  } catch (err) {
+    res.status(500).json({ status: 'error', error: err.message });
   }
-  return res.status(401).json({ status: 'fail', message: 'Auth error' });
-};
-
-app.get('/productos', auth, async (req, res) => {
-  const products = await productModel.find();
-  res.render('productos', {
-    username: 'Juan',
-    ListProduct: products,
-  });
 });
+
+
+// Rutas para el registro y el login
+app.get('/users/register', (req, res) => {
+  res.render('register');
+});
+
+// Ruta para el formulario de inicio de sesión
+app.get('/users/login', (req, res) => {
+  res.render('login');
+});
+
+
+
+// Configuración de la conexión a MongoDB
+mongoose.set('strictQuery', false);
+
+const mongoURL = 'mongodb+srv://Shootemotion:Soporte01@cluster0.trosur8.mongodb.net/entregaFinal';
+
+async function connectToMongoDB() {
+  try {
+    await mongoose.connect(mongoURL, {
+      useUnifiedTopology: true,
+      useNewUrlParser: true
+    });
+    console.log('Conectado a MongoDB correctamente.');
+  } catch (err) {
+    console.error('Error al conectar a la base de datos:', err);
+    process.exit(1); // Salir del proceso si hay un error en la conexión a MongoDB
+  }
+}
+
+
+
+
+
+
+
+// Creación del servidor de Socket.IO
+const io = new Server();
 
 // Evento para actualizar la lista de productos en tiempo real
 io.on('connection', (socket) => {
@@ -94,17 +168,16 @@ io.on('connection', (socket) => {
   });
 });
 
-mongoose.set('strictQuery', false);
 
-async function startServer() {
-  try {
-    await mongoose.connect('mongodb+srv://Shootemotion:Soporte01@cluster0.trosur8.mongodb.net/entregaFinal', {
-      useUnifiedTopology: true,
-    });
-    server.listen(8080, () => console.log('Server running on port 8080'));
-  } catch (err) {
-    console.error('Error al conectar a la base de datos:', err);
-  }
-}
+// Configuración del servidor HTTP
+const server = http.createServer(app);
 
-startServer();
+// Iniciando el servidor HTTP y Socket.IO
+const PORT = 8080;
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Conexión a MongoDB
+connectToMongoDB();

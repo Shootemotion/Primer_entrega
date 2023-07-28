@@ -5,6 +5,8 @@ const userCollection = 'users'
 const userSchema = new mongoose.Schema({
     first_name : {type: String, unique: true},
     last_name :  {type: String, required: true},
+    password: { type: String, required: true },
+    rol: { type: String, required: true },
     email: String
 })
 
