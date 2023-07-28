@@ -17,6 +17,7 @@ router.get('/',async(req,res) => {
 
 
 
+
 router.post('/register', async (req,res) => {
     const user = req.body
     console.log('Datos recibidos del formulario:', user); 
@@ -48,9 +49,6 @@ catch(err){
     res.status(500).json({status:'error',error: err.message})
  }
 })
-
-
-
 
 
 
@@ -91,7 +89,7 @@ router.post('/login', async (req, res) => {
       req.session.user = {
         first_name: existingUser.first_name,
         email: existingUser.email,
-        // Otras propiedades relevantes que desees almacenar en la sesión
+  
       };
   
       // Redirigir al usuario a la página que deseas mostrar después de iniciar sesión (por ejemplo, la página protegida)

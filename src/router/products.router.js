@@ -53,6 +53,9 @@ productRouter.post('/', async (req, res) => {
   }
 })
 
+
+
+
   // Agregar nuevos productos
 productRouter.post('/manyProducts', async (req, res) => {
     let newProduct; // Declarar newProduct aquí, antes del bloque try
@@ -74,6 +77,9 @@ productRouter.post('/manyProducts', async (req, res) => {
       }
     }
 
+
+
+
     // Crear y agregar cada producto a la base de datos
     const createdProducts = await productModel.create(newProducts);
     const products = await productModel.find().lean().exec();
@@ -82,6 +88,8 @@ productRouter.post('/manyProducts', async (req, res) => {
     res.status(500).json({ message: 'Ocurrió un problema en la carga de datos.', error: err.message });
   }
 });
+
+
 
 
 // Actualizar un producto existente
@@ -100,6 +108,7 @@ productRouter.put('/:pid', async (req, res) => {
     res.status(500).json({ status: 'error' , error: err.message })
   }
 });
+
 
 
 

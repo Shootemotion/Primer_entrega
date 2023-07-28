@@ -8,7 +8,7 @@ const cartSchema = new mongoose.Schema({
       _id: false,
       product: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'products' // Aquí debes asegurarte de que el nombre 'Product' coincida con el modelo de productos definido en tu aplicación.
+        ref: 'products'
       },
       quantity: Number,
     }],
@@ -17,7 +17,7 @@ const cartSchema = new mongoose.Schema({
 });
 
 cartSchema.pre('findById', function () {
-  this.populate('products.product'); // Aquí también, cambia 'products.product' por 'products.product'
+  this.populate('products.product'); 
 });
 
 

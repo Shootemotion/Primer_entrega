@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema({
     thumbnail: {type: [String], default: []},
 })
 
-//plugin for pagination of data using skip and limit method in mongoDB
+
 productSchema.plugin(mongoosePaginate);
 
 mongoose.set('strictQuery',false)

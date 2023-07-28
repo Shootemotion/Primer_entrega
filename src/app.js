@@ -114,12 +114,16 @@ app.get('/realtimeproducts', auth, async (req, res) => {
 
 // Rutas para el registro y el login
 app.get('/users/register', (req, res) => {
-  res.render('register');
+  res.render('register',{
+    nombre_vista: 'Registro',
+  });
 });
 
 // Ruta para el formulario de inicio de sesión
 app.get('/users/login', (req, res) => {
-  res.render('login');
+  res.render('login',{
+    nombre_vista: 'Logging',
+  });
 });
 
 
