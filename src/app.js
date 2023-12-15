@@ -1,6 +1,6 @@
 import express from 'express';
 import { productModel } from './dao/models/product.model.js';
-import userRouter from './router/user.router.js';
+import userRouter from './router/session.router.js';
 import productRouter from './router/products.router.js';
 import cartRouter from './router/carts.router.js';
 import handlebars from 'express-handlebars';
@@ -9,6 +9,8 @@ import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import MongoStore from 'connect-mongo';
 import session from 'express-session';
+import passport from "passport"
+import initializePassport from './config/passport.config.js';
 
 
 const app = express();
@@ -22,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
     store: MongoStore.create({
-      mongoUrl: 'mongodb+srv://Shootemotion:Soporte01@cluster0.trosur8.mongodb.net/',
+      mongoUrl: 'mongodb+srv://Shootemotion:wBI77vP5D5vIpwb7@shootemotion.galhkcd.mongodb.net/',
       dbName: 'sessionsDB',
       mongoOptions: {
         useNewUrlParser: true,
@@ -34,16 +36,13 @@ app.use(
     saveUninitialized: true
   })
 );
+initializePassport()
+app.use(passport.initialize())
+app.use(passport.session())
+
+http://localhost:8080/api/session/githubcallback
 
 
-const auth = (req, res, next) => {
-  if (req.session?.user) 
-  return next()
- else {
-  // Redirigir al usuario a la ruta de inicio de sesión (login)
-  return res.redirect('/users/login');
-}
-}
 
 
 // Configuración del motor de plantillas
@@ -71,7 +70,7 @@ app.get('/home', async (req, res) => {
 });
 
 // Ruta para la vista /realtimeproducts
-app.get('/realtimeproducts', auth, async (req, res) => {
+app.get('/realtimeproducts', async (req, res) => {
   const productsPerPage = 10; // Número de productos por página (ajústalo según tus necesidades)
   const page = parseInt(req.query.page) || 1;
 
@@ -131,11 +130,11 @@ app.get('/users/login', (req, res) => {
 // Configuración de la conexión a MongoDB
 mongoose.set('strictQuery', false);
 
-const mongoURL = 'mongodb+srv://Shootemotion:Soporte01@cluster0.trosur8.mongodb.net/entregaFinal';
+const mongoURL = 'mongodb+srv://Shootemotion:wBI77vP5D5vIpwb7@shootemotion.galhkcd.mongodb.net/entregaFinal';
 
 async function connectToMongoDB() {
   try {
-    await mongoose.connect(mongoURL, {
+      mongoose.connect(mongoURL, {
       useUnifiedTopology: true,
       useNewUrlParser: true
     });
