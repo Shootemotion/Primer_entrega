@@ -1,6 +1,5 @@
 <!-- realTimeProducts.handlebars -->
 <h1>{{nombre_vista}}</h1>
-
 <!-- Formulario para agregar productos -->
 <form id="productForm" action="/products" method="post"> 
   <input type="text" name="title" placeholder="Title" required>
@@ -34,7 +33,8 @@
       <td>{{this.price}}</td>
       <td>{{this.stock}}</td>
       <td>
-        <button onclick="deleteProduct('{{this.code}}')">Delete</button>
+     <button class="delete-button" data-id="{{this._id}}" onclick="eliminarProducto('{{this._id}}')">Delete</button>
+
       </td>
     </tr>
     {{/each}}

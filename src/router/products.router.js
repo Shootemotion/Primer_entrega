@@ -46,7 +46,7 @@ productRouter.post('/', async (req, res) => {
   
     const product = await productModel.create(newProduct)
     const products = await productModel.find().lean().exec()    
-    res.status(200).json({ message: 'Producto agregado', producto: product })
+    res.render('realTimeProducts', { nombre_vista: 'Tabla de Productos', products });
   } catch (err) {
 
     res.status(500).json({ message: 'Ocurrió un problema en la carga de datos.', error: err.message })
@@ -130,5 +130,7 @@ productRouter.delete('/:id', async (req, res) => {
 
   }
 });
+
+
 
 export default productRouter;

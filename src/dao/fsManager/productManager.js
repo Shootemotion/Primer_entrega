@@ -93,7 +93,9 @@ class ProductManager {
   
     return true 
   }
+
 }
-  
+
+
 
 export default ProductManager;
