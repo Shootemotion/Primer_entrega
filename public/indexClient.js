@@ -49,7 +49,7 @@ socket.on('updatedProductList', (products) => {
   });
 });
 
-// Escucha el evento de clic en el botón de eliminación
+
 // Función para eliminar un producto
 async function eliminarProducto(id) {
   try {
@@ -58,14 +58,14 @@ async function eliminarProducto(id) {
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+    })
 
     if (response.ok) {
-      const responseData = await response.json();
+      const responseData = await response.json()
       console.log(responseData);
-      // Puedes agregar más mensajes de consola o acciones aquí según sea necesario
+      // Realiza alguna actualización de pagina
       location.reload(true);
-      // Realiza alguna actualización de la interfaz de usuario si es necesario
+
     } else {
       const errorMessage = await response.text();
       console.error(errorMessage);
